@@ -7,13 +7,12 @@ Created on Wed Feb 14 13:22:58 2018
 
 
 
-
-
-""" NOTE: Pour la modification du script aller à la ligne 183 et modifier selon 
-l'emplacement de votre fichier txt (matrice) et  le nombre de composantes (nb_c) 
-ainsi que le nombre d'itérations"""
-
-
+""" This algorithm performs MCR-Hier-LLM on the selected data set. 
+To use, select a dataset in by overwriting the name of the dataset of line 291.
+Please modify line 292 to modify the correct direction of the file 
+(i.e. the observations must be attributed to the rows and the pixels to the columns),
+then set the nuber of components to be used on line 293. For any and all information
+please contact me at jeffrey.byrns@usherbrooke.ca"""
 
 
 
@@ -21,7 +20,6 @@ import numpy as np
 from sklearn.cluster import KMeans
 from scipy.optimize import minimize
 import scipy.stats as stats
-
 from functools import partial
 from tqdm import tqdm
 
@@ -48,6 +46,8 @@ class HyperspectralSegmentationMCR_HIER_LLM:
             c = cls.C_plm(x, s, x_norm, x_sum, nb_c, c_pred)
             s = cls.s_plm(x, c)
             
+            c_pred = c
+            
 
 
 
@@ -61,8 +61,7 @@ class HyperspectralSegmentationMCR_HIER_LLM:
         x_sum = np.asarray([np.sum(x, axis=1)]).T
         x_norm = x / x_sum
         x_norm = np.nan_to_num(x_norm)
-        x_raw = x  # note that lambda is a function in python, lada replaces lambda as not to overwrite it. Also lada is a shitty russian car manufacturer, look it up!
-
+        x_raw = x  
 
         c = KMeans(n_clusters=nb_c).fit(x_norm).labels_
         s = np.zeros(( np.size(x_norm, axis = 1),nb_c))

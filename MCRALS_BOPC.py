@@ -8,7 +8,8 @@ Created on Mon Jun 11 11:33:12 2018
 """ Modify line 100 to select datafile to analyse, line 101 to modify the correct 
 direction of the file (i.e. the observations must be attributed to the rows and 
 the pixels to the columns),line 102 to modify the number of components and line 
-103 to modify the number of iterations made by the algorithm (passing between c and s) """
+103 to modify the number of iterations made by the algorithm (passing between c and s).
+For any and all information please contact me at jeffrey.byrns@usherbrooke.ca""" 
 
 
 import numpy as np

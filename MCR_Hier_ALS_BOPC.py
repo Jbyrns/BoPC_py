@@ -5,10 +5,17 @@ Created on Mon Jun 11 12:21:53 2018
 @author: jeffr
 """
 
+""" This algorithm performs MCR-Hier-ALS on the selected data set. 
+To use, select a dataset in by overwriting the name of the dataset of line 215.
+Please modify line 216 to modify the correct direction of the file 
+(i.e. the observations must be attributed to the rows and the pixels to the columns),
+then set the nuber of components to be used on line 217. For any and all information
+please contact me at jeffrey.byrns@usherbrooke.ca"""
+
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 from scipy import linalg
-import matplotlib.pyplot as plt
+
 
 
 class HyperspectralSegmentationMCR_HIER_ALS:

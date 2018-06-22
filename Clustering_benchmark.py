@@ -43,6 +43,9 @@ skm = skm.T
 ckmr = x_norm @ skm.T @ np.linalg.inv(skm @ skm.T)
 plt.subplot(5,1,1)
 plt.plot(ckmr)
+plt.title(" Kmeans clustering as a comparisson ")
+plt.xlabel('pixel')
+plt.ylabel('composition')
 
 """ agglomerative clustering Ward """
 cacw= AgglomerativeClustering(n_clusters=nb_c, linkage= 'ward').fit(x_norm).labels_
@@ -58,6 +61,9 @@ sacw = sacw.T
 cacwr = x_norm @ sacw.T @ np.linalg.inv(sacw @ sacw.T)
 plt.subplot(5,1,2)
 plt.plot(cacwr)
+plt.title(" agglomerative clustering Ward ")
+plt.xlabel('pixel')
+plt.ylabel('composition')
 
 """ agglomerative clustering Complete """
 cacc= AgglomerativeClustering(n_clusters=nb_c, linkage= 'complete').fit(x_norm).labels_
@@ -73,6 +79,9 @@ sacc = sacc.T
 caccr = x_norm @ sacc.T @ np.linalg.inv(sacc @ sacc.T)
 plt.subplot(5,1,3)
 plt.plot(caccr)
+plt.title(" agglomerative clustering Complete ")
+plt.xlabel('pixel')
+plt.ylabel('composition')
 
 """ agglomerative clustering Average """
 caca= AgglomerativeClustering(n_clusters=nb_c, linkage= 'average').fit(x_norm).labels_
@@ -88,6 +97,9 @@ saca = saca.T
 cacar = x_norm @ saca.T @ np.linalg.inv(saca @ saca.T)
 plt.subplot(5,1,4)
 plt.plot(cacar)
+plt.title(" agglomerative clustering Average ")
+plt.xlabel('pixel')
+plt.ylabel('composition')
 
 
 """ HDBSCAN clustering"""
@@ -114,3 +126,8 @@ sHDBSCAN = sHDBSCAN.T
 cHDBSCAN = x_norm @ sHDBSCAN.T @ np.linalg.inv(sHDBSCAN @ sHDBSCAN.T)
 plt.subplot(5,1,5)
 plt.plot(cHDBSCAN)
+plt.title(" HDBSCAN clustering ")
+plt.xlabel('pixel')
+plt.ylabel('composition')
+
+plt.show()
