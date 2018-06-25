@@ -1,121 +1,106 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun 11 12:21:53 2018
+Created on Fri Mar 16 08:50:40 2018
 
 @author: jeffr
 """
 
-""" This algorithm performs MCR-Hier-ALS on the selected data set. 
-To use, select a dataset in by overwriting the name of the dataset of line 215.
-Please modify line 216 to modify the correct direction of the file 
-(i.e. the observations must be attributed to the rows and the pixels to the columns),
-then set the nuber of components to be used on line 217. For any and all information
-please contact me at jeffrey.byrns@usherbrooke.ca"""
-
 import numpy as np
-from sklearn.cluster import MiniBatchKMeans
+
 from scipy import linalg
+from sklearn.cluster import MiniBatchKMeans
+
 
 
 
 class HyperspectralSegmentationMCR_HIER_ALS:
 
     @classmethod
-    def mcr_hier(cls, x, nb_c, max_level=10):
+    def mcr_hier(cls, x, max_iter=25, max_level=10):
 
-
-        """ Determines the number of pixels in the final subset at which the algorithm will stop"""
         obs = np.size(x,axis=0)
         min_pixels = max(50, obs*.01)
 
-        """ initializes the lists and arrays used"""
+        # First level
+        
         Extracted_conc = []  # list
         Extracted_pos = []  # list
         Extracted_Spectra = []  # array
         Extracted_end = []  # array
-
-        """ Generate the position vector"""
+        
+        # Generate position vector
+        
         positions = np.array(range(np.size(x, axis=0)))
+        
+        [c, s] = cls.mcr_als(x, 2, max_iter)
 
-        """ Performs MCR_LLM on the raw data """
-
-        [c, s] = cls.mcr_als(x, nb_c, 1)
-
-        """List initialisation"""
-
-        all_spectra = [[0 for x in range(2 + (2 ** max_level - 1) * 2)] for y in range(max_level + 1)]  # list
-        all_conc = [[0 for x in range(2 + (2 ** max_level - 1) * 2)] for y in range(max_level + 1)]  # list
-        all_pos = [[0 for x in range(2 + (2 ** max_level - 1) * 2)] for y in range(max_level + 1)]  # list
-
-        """Save data"""
+        # list initialisation
+        
+        all_spectra = [[0 for x in range(2+(2**max_level-1)*2) ] for y in range(max_level+1) ]  # list
+        all_conc =[[0 for x in range(2+(2**max_level-1)*2) ] for y in range(max_level+1) ]  # list
+        all_pos = [[0 for x in range(2+(2**max_level-1)*2) ] for y in range(max_level+1) ]  # list
+        
+        # Save data
         all_spectra[0][0] = s[0, :]
         all_spectra[0][1] = s[1, :]
         all_conc[0][0] = c[:, 0]
         all_conc[0][1] = c[:, 1]
-
-        """Save filters"""
-
+        
+        # Save filters
+        
         all_pos[0][0] = positions[c[:, 0] > .5]
         all_pos[0][1] = positions[c[:, 0] <= .5]
-
+        
         """ Next LEVELS """
         current_level = 1
-
+        
         all_count = 1
-
+        
         for level_nb in range(max_level):
-            """For each division"""
+            # for each division
             for level in range(2 ** (current_level)):
-                """Get positions"""
-
-                """ determine the current position and neglect 0 values"""
+                # Get positions
+        
                 try:
-                    cur_pos = all_pos[current_level - 1][level]
+                    cur_pos = all_pos[current_level-1][level]
                 except not cur_pos == 0:
                     pass
-                """Continue if it is ok"""
-
+            # Continue if it is ok
+        
                 if np.size(cur_pos) > 1:
-                    """ Continue if you have not reached the cutoff number of pixels"""
+            
                     if len(cur_pos) >= min_pixels:
-
-                        """ Performs MCR_LLM on the raw data"""
-                        [c, s] = cls.mcr_als(x[cur_pos,:], nb_c, 1)
-
-
-
-                        """save data"""
-                        all_spectra[current_level][2 + (level - 1) * 2] = s[0, :]
-                        all_spectra[current_level][3 + (level - 1) * 2] = s[1, :]
-                        all_conc[current_level][2 + (level - 1) * 2] = c[:, 0]
-                        all_conc[current_level][3 + (level - 1) * 2] = c[:, 1]
-
-
-                        """save filters"""
-
-                        all_pos[current_level][3 + (level - 1) * 2] = cur_pos[c[:, 0] <= .5]
-                        all_pos[current_level][2 + (level - 1) * 2] = cur_pos[c[:, 0] > .5]
-
-
-
-                    else:
-                        """just reached the minimum pixels"""
-                        """add concerned spectrum"""
-                        Extracted_Spectra = np.append(Extracted_Spectra, all_spectra[current_level - 1][level])
-
-                        Extracted_end = np.append(Extracted_end, [current_level - 1, level], axis=0)
-
-                        CC = all_conc[current_level - 1][level]
-
+            
+                        [c, s] = cls.mcr_als(x[cur_pos,:], 2, max_iter)
+            
+                        # save data
+                        all_spectra[current_level][2+(level-1) * 2] = s[0, :]
+                        all_spectra[current_level][3 + (level-1) * 2] = s[1, :]
+                        all_conc[current_level][2+(level-1) * 2] = c[:, 0]
+                        all_conc[current_level][3 + (level-1) * 2] = c[:, 1]
+            
+                        # save filters
+                        all_pos[current_level][2+(level-1) * 2] = cur_pos[c[:, 0] > .5]
+                        all_pos[current_level][3 + (level-1) * 2] = cur_pos[c[:, 0] <= .5]
+                    else:  # just reached the minimum pixels
+            
+                        # add concerned spectrum
+                        Extracted_Spectra = np.append(Extracted_Spectra, all_spectra[current_level-1][level])
+        
+                        Extracted_end = np.append(Extracted_end, [current_level-1, level], axis=0)
+            
+                        CC = all_conc[current_level-1][level]
+            
                         Extracted_conc.append(CC[CC > .5])
-                        Extracted_pos.append(all_pos[current_level - 1][level])
+                        Extracted_pos.append(all_pos[current_level-1][level])
                         all_count = all_count + 1
-
+            
             current_level = current_level + 1
-
-            """ Max Level reached... Extract all spectra in the last level"""""
+        
+        
+            # Max Level reached... Extract also all spectra in the last level
         if np.size(all_pos, axis=0) == max_level + 1:
-
+            
             for j in range(np.size(all_pos, axis=1)):
                 if np.max(np.size(all_pos[-1][j])) > 1:
                     Extracted_Spectra = np.append(Extracted_Spectra, all_spectra[-1][j])
@@ -124,16 +109,11 @@ class HyperspectralSegmentationMCR_HIER_ALS:
                     Extracted_conc.append([CC > .5])
                     Extracted_pos.append(all_pos[-1][j])
                     all_count = all_count + 1
-        """ configure the arrays to the correct dimensions"""
-        Extracted_end = Extracted_end.reshape((round(len(Extracted_end) / 2), 2))
+        
+        Extracted_end = Extracted_end.reshape((round(len(Extracted_end)/2), 2))
         Extracted_Spectra = Extracted_Spectra.reshape((round(len(Extracted_Spectra) / np.size(x, axis=1)), np.size(x, axis=1)))
-
         return Extracted_Spectra, Extracted_end, Extracted_conc, Extracted_pos
 
-    
-
-
-    
     @classmethod
     def mcr_als(cls,x, nb_c, max_iter=50):
 
@@ -210,13 +190,11 @@ class HyperspectralSegmentationMCR_HIER_ALS:
         s = s.astype('float32')
 
         return c, s
-    
-    
+
+
 x = np.loadtxt("data_2.txt", comments="#", delimiter=",", unpack=False) # Importation de la matrice
 x = x.T
-nb_c =7  # nombre de composantes
+max_iter = 25  # nombre d'itérations
 
-[Extracted_Spectra, Extracted_end, Extracted_conc, Extracted_pos] = HyperspectralSegmentationMCR_HIER_ALS.mcr_hier(x, nb_c) # appel de l'algorithme
+[Extracted_Spectra, Extracted_end, Extracted_conc, Extracted_pos] = HyperspectralSegmentationMCR_HIER_ALS.mcr_hier(x,max_iter) # appel de l'algorithme
 
-
-    
