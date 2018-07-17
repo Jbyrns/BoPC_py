@@ -184,7 +184,7 @@ class HyperspectralSegmentationMCR_LLM:
 x = np.loadtxt("data_2.txt", comments="#", delimiter=",", unpack=False) # Importation de la matrice
 x = x.T
 nb_c =7  # nombre de composantes
-nb_iter = 50 # nombre d'itérations
+nb_iter = 25 # nombre d'itérations
 
 [c, s] = HyperspectralSegmentationMCR_LLM.mcr_llm(x,nb_c,nb_iter) # appel de l'algorithme
 
